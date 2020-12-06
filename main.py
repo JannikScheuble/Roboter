@@ -1,266 +1,111 @@
-
 # !/usr/bin/env python3
-import ev3dev.ev3 as ev3
+import robot_control as ctrl
+from robot_ai_module import *
+from board import *
 from time import sleep
+import ev3dev.ev3 as ev3
+import copy as copy
 
-# Festlegen der Motorsensoren
-motor_left = ev3.LargeMotor('outA')
-motor_right = ev3.LargeMotor('outD')
-motor_medium =ev3.MediumMotor('outB')
-# Festlegen der Sensoren
-gy = ev3.GyroSensor()     #Gyrosensor
-gy.mode = 'GYRO-ANG'
-cl = ev3.ColorSensor()    #Farbsensor
-cl.mode = 'COL-COLOR'
-ts1 = ev3.TouchSensor('in2')     #sensor Links
-ts2 = ev3.TouchSensor('in3')     #sensor Rechts
-#variablen und Listen Festlegen
-squares = []
-# Funktionen werden definiert
-def leftturn():
-    motor_left.wait_while('running')
-    motor_right.wait_while('running')
-    motor_left.run_timed(time_sp=2000, speed_sp=-105)
-    motor_right.run_timed(time_sp=2000, speed_sp=106)
-    return
+def getOpponentInput(board):
+    row = None
+    col = None
 
+    while True:
+        while True:
+            # Try catch in case the user inputs a non-numeric value
+            try:
+                row = int(input("Which row did the opponent place its block at: "))
+            except:
+                row = None
 
-def rightturn():
-    motor_left.wait_while('running')
-    motor_right.wait_while('running')
-    motor_left.run_timed(time_sp=2000, speed_sp=125)
-    motor_right.run_timed(time_sp=2000, speed_sp=-105)
-    return
-
-def halfturn():
-    motor_left.wait_while('running')
-    motor_right.wait_while('running')
-    motor_left.run_timed(time_sp=4000, speed_sp=-105)
-    motor_right.run_timed(time_sp=4000, speed_sp=105)
-    return
-
-def drive15squares():
-    motor_left.wait_while('running')
-    motor_right.wait_while('running')
-    motor_left.run_timed(time_sp=2000, speed_sp=397)
-    motor_right.run_timed(time_sp=2000, speed_sp=397)
-    return
-
-
-def drive1square():
-    motor_left.wait_while('running')
-    motor_right.wait_while('running')
-    motor_left.run_timed(time_sp=1000, speed_sp=260)
-    motor_right.run_timed(time_sp=1000, speed_sp=260)
-    return
-
-
-def pickingupblocks():  # in eine funktion noch und mit einem stopp feature
-    motor_left.wait_while('running')
-    motor_right.wait_while('running')
-    motor_left.run_timed(time_sp=2000, speed_sp=105)        #Brick turns right
-    motor_right.run_timed(time_sp=2000, speed_sp=-105)
-    sleep(3)
-    x1 = motor_right.position                #messures right motor position in degrees
-    y1 = motor_left.position                 #messures let motor position in degrees
-    while cl.value() != 3:                      #run until the colour green is detected
-        motor_left.run_forever(speed_sp=100)
-        motor_right.run_forever(speed_sp=100)
-    sleep(1)                        #continues to run for 1 mor second
-    motor_left.stop()               #motor stops
-    motor_right.stop()
-    sleep(0.5)
-    motor_medium.run_forever(speed_sp=-190)     #Hold block
-    sleep(1)
-    x2 = motor_right.position  #New position
-    y2 = motor_left.position
-    x3 = x2-x1                  #difference between first and second position
-    y3 = y2-y1
-    motor_left.run_timed(time_sp=1000, speed_sp=-int(y3))      #moves back to first position
-    motor_right.run_timed(time_sp=1000, speed_sp=-int(x3))
-    print(x1,x2,x3,y1,y2,y3)
-    leftturn()                          #turns back to beginning position
-    return
-
-
-def dropoffblocks():
-    motor_medium.stop()
-    motor_medium.run_timed(time_sp=2000, speed_sp=150)
-    return
-
-def navigatesquare():
-    if x == 1 or x == 2 or x == 3:
-        a1 = motor_right.position                #messures right motor position in degrees
-        b1 = motor_left.position                 #messures left motor position in degrees
-        drive15squares()
-        for i in range(2):
-            drive1square()
-        if x == 1:
-            drive1square()
-            a2 = motor_right.position                #messures right motor position in degrees
-            b2 = motor_left.position
-            leftturn()
-            sleep(3)
-            motor_left.wait_while('running')
-            motor_right.wait_while('running')
-            motor_left.run_timed(time_sp=1000, speed_sp=180)
-            motor_right.run_timed(time_sp=1000, speed_sp=180)
-            sleep(1.5)
-            dropoffblocks()
-            sleep(0.1)
-            motor_left.run_timed(time_sp=1000, speed_sp=-180)
-            motor_right.run_timed(time_sp=1000, speed_sp=-180)
-            rightturn()
-            sleep(3)
-            a3 = a2-a1+191
-            b3 = b2-b1+191
-            motor_left.run_timed(time_sp=4000, speed_sp=-int(0.25*b3))      #moves back to first position
-            motor_right.run_timed(time_sp=4000, speed_sp=-int(0.25*a3))
-            return
-
-        elif x == 2:
-            a2 = motor_right.position  # messures right motor position in degrees
-            b2 = motor_left.position
-            sleep(1.5)
-            dropoffblocks()
-            sleep(3)
-            a3 = a2 - a1 + 191
-            b3 = b2 - b1 + 191
-            motor_left.run_timed(time_sp=4000, speed_sp=-int(0.25*b3))  # moves back to first position
-            motor_right.run_timed(time_sp=4000, speed_sp=-int(0.25*a3))
-            return
-
-        else:
-            drive1square()
-            a2 = motor_right.position  # messures right motor position in degrees
-            b2 = motor_left.position
-            rightturn()
-            motor_left.wait_while('running')
-            motor_right.wait_while('running')
-            motor_left.run_timed(time_sp=1000, speed_sp=180)
-            motor_right.run_timed(time_sp=1000, speed_sp=180)
-            sleep(1.5)
-            dropoffblocks()
-            sleep(0.1)
-            motor_left.run_timed(time_sp=1000, speed_sp=-180)
-            motor_right.run_timed(time_sp=1000, speed_sp=-180)
-            leftturn()
-            sleep(3)
-            a3 = a2 - a1 + 191
-            b3 = b2 - b1 + 191
-            motor_left.run_timed(time_sp=4000, speed_sp=-int(0.25*b3))  # moves back to first position
-            motor_right.run_timed(time_sp=4000, speed_sp=-int(0.25*a3))
-            return
-
-    elif x == 4 or x == 5 or x == 6:
-        a1 = motor_right.position  # messures right motor position in degrees
-        b1 = motor_left.position  # messures left motor position in degrees
-        drive15squares()
-        for i in range(1):
-            drive1square()
-            if x == 4:
-                a2 = motor_right.position  # messures right motor position in degrees
-                b2 = motor_left.position
-                leftturn()
-                motor_left.wait_while('running')
-                motor_right.wait_while('running')
-                motor_left.run_timed(time_sp=1000, speed_sp=180)
-                motor_right.run_timed(time_sp=1000, speed_sp=180)
-                sleep(1.5)
-                dropoffblocks()
-                sleep(0.1)
-                motor_left.run_timed(time_sp=1000, speed_sp=-180)
-                motor_right.run_timed(time_sp=1000, speed_sp=-180)
-                rightturn()
-                sleep(3)
-                a3 = a2 - a1 + 191
-                b3 = b2 - b1 + 191
-                motor_left.run_timed(time_sp=4000, speed_sp=-int(0.25*b3))  # moves back to first position
-                motor_right.run_timed(time_sp=4000, speed_sp=-int(0.25*a3))
-                return
-
-            elif x == 5:
-                a2 = motor_right.position  # messures right motor position in degrees
-                b2 = motor_left.position
-                sleep(1.5)
-                dropoffblocks()
-                sleep(0.1)
-                a3 = a2 - a1 + 191
-                b3 = b2 - b1 + 191
-                motor_left.run_timed(time_sp=4000, speed_sp=-int(0.25*b3))  # moves back to first position
-                motor_right.run_timed(time_sp=4000, speed_sp=-int(0.25*a3))
-                return
-
+            if row == None or row < 0 or row > 2:
+                print("Invalid row. Please make sure to enter a number from 0 to 2 (inclusive).")
             else:
-                a2 = motor_right.position  # messures right motor position in degrees
-                b2 = motor_left.position
-                rightturn()
-                motor_left.wait_while('running')
-                motor_right.wait_while('running')
-                motor_left.run_timed(time_sp=1000, speed_sp=180)
-                motor_right.run_timed(time_sp=1000, speed_sp=180)
-                sleep(1.5)
-                dropoffblocks()
-                sleep(0.1)
-                motor_left.run_timed(time_sp=1000, speed_sp=-180)
-                motor_right.run_timed(time_sp=1000, speed_sp=-180)
-                leftturn()
-                sleep(3)
-                a3 = a2 - a1 + 191
-                b3 = b2 - b1 + 191
-                motor_left.run_timed(time_sp=4000, speed_sp=-int(0.25*b3))  # moves back to first position
-                motor_right.run_timed(time_sp=4000, speed_sp=-int(0.25*a3))
-                return
-    else:
-        drive15squares()
-        if x == 7:
-            leftturn()
-            motor_left.wait_while('running')
-            motor_right.wait_while('running')
-            motor_left.run_timed(time_sp=1000, speed_sp=180)
-            motor_right.run_timed(time_sp=1000, speed_sp=180)
-            sleep(1.5)
-            dropoffblocks()
-            sleep(0.01)
-            motor_left.run_timed(time_sp=1000, speed_sp=-180)
-            motor_right.run_timed(time_sp=1000, speed_sp=-180)
-            rightturn()
-            sleep(3)
-            motor_left.run_timed(time_sp=4000, speed_sp=-189)
-            motor_right.run_timed(time_sp=4000, speed_sp=-189)
-            return
+                break
 
-        elif x == 8:
-            sleep(3)
-            dropoffblocks()
-            sleep(0.5)
-            motor_left.run_timed(time_sp=4000, speed_sp=-199)
-            motor_right.run_timed(time_sp=4000, speed_sp=-199)
-            return
+        while True:
+            # Try catch in case the user inputs a non-numeric value
+            try:
+                col = int(input("Which column did the opponent place its block at: "))
+            except:
+                col = None
 
+            if col == None or col < 0 or col > 2:
+                print("Invalid column. Please make sure to enter a number from 0 to 2 (inclusive).")
+            else:
+                break
+
+        if board.GetField(row, col) != 0:
+            print("The field you tried to select is already occupied. Please check your input.")
         else:
-            rightturn()
-            motor_left.wait_while('running')
-            motor_right.wait_while('running')
-            motor_left.run_timed(time_sp=1000, speed_sp=180)
-            motor_right.run_timed(time_sp=1000, speed_sp=180)
-            sleep(1.5)
-            dropoffblocks()
-            sleep(0.01)
-            motor_left.run_timed(time_sp=1000, speed_sp=-180)
-            motor_right.run_timed(time_sp=1000, speed_sp=-180)
-            leftturn()
-            sleep(3)
-            motor_left.run_timed(time_sp=4000, speed_sp=-195)
-            motor_right.run_timed(time_sp=4000, speed_sp=-195)
-            return
+            sureYN = None
+            while True:
+                print("Input was: row: " + str(row) + ", col: " + str(col))
+                print("Does the board now look like this?")
+                newBoard = copy.copy(board)
+                newBoard.SetField(row, col, 2)
+                newBoard.PrintBoard()
+                sureYN = input("Are you sure that your input is correct?" + "\nEnter 'Y' for yes, 'N' for no: ")
+                if sureYN == "N" or sureYN == "Y":
+                    break
+                else:
+                    print("Invalid input. Please enter 'Y' or 'N'!")
 
+            if sureYN == "Y":
+                break
 
- # Main Code th9at will be executed
+    return row, col
 
-if __name__ == '__main__':
-    print("Start")
-    x = int(input("Enter number from 1-9"))
-    pickingupblocks()  # Motor gets its block
+def makeOpponentMove(board):
+    opponentInputRow, opponentInputCol = getOpponentInput(board)
+    board.SetField(opponentInputRow, opponentInputCol, 2)
+
+def makeAIMove(ai, board):
+    nextMove = ai.getNextMove(board, 0)
+
+    nextMoveForControl = 3 * nextMove[0] + nextMove[1] + 1
+
+    ctrl.pickingupblocks()  # Motor gets its block
     sleep(2)
-    navigatesquare()
+    ctrl.navigatesquare(nextMoveForControl)
+
+    board.SetField(nextMove[0], nextMove[1], 1)
+
+ # Main Code that will be executed
+if __name__ == '__main__':
+    ai = AI("ai_first_moves.ai")
+    board = Board()
+
+    print("Start")
+    currentPlayer = None
+
+    while not (currentPlayer == 0 or currentPlayer == 1):
+        currentPlayer = int(input("Who is starting (0: we are starting, 1: opponent is starting): "))
+        if not (currentPlayer == 0 or currentPlayer == 1):
+            print("Invalid input. Please make sure to input valid values. (See input prompt)")
+
+    while True:
+        if currentPlayer == 0:
+            makeAIMove(ai, board)
+        else:
+            makeOpponentMove(board)
+
+        print("Current board state:")
+        board.PrintBoard()
+
+        winState = board.CheckWinState()
+        if winState == 2:
+            print("Draw!")
+            ev3.Sound.speak("It's a draw!").wait()
+            break
+        elif winState == 0:
+            print("We won!")
+            ev3.Sound.speak("We won!").wait()
+            break
+        elif winState == 1:
+            print("They won. IMPOSSIBLE...")
+            ev3.Sound.speak("They won. IMPOSSIBLE...").wait()
+            break
+
+        # Next players turn
+        currentPlayer = (currentPlayer + 1) % 2
