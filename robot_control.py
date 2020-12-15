@@ -51,7 +51,7 @@ def halfturn():
     motor_right.run_timed(time_sp=4000, speed_sp=105)
     return
 
-def drive15squares():
+def drive15squares():                               #long square
     motor_left.wait_while('running')
     motor_right.wait_while('running')
     motor_left.run_timed(time_sp=2000, speed_sp=266)
@@ -59,7 +59,7 @@ def drive15squares():
     return
 
 
-def drive1square():
+def drive1square():                                    #normal square
     motor_left.wait_while('running')
     motor_right.wait_while('running')
     motor_left.run_timed(time_sp=2000, speed_sp=100)
@@ -75,10 +75,10 @@ def pickingupblocks():  # in eine funktion noch und mit einem stopp feature
     while cl.value() != 3:                      #run until the colour green is detected
         motor_left.run_forever(speed_sp=100)
         motor_right.run_forever(speed_sp=100)
-    sleep(1)                        #continues to run for 1 mor second
+    sleep(0.7)                        #continues to run for 1 mor second
     motor_left.stop()               #motor stops
     motor_right.stop()
-    sleep(0.7)
+    sleep(0.1)
     motor_medium.run_forever(speed_sp=-190)     #Hold block
     sleep(1)
     x2 = motor_right.position  #New position
@@ -100,7 +100,7 @@ def dropoffblocks():
     return
 
 def navigatesquare(x):
-    if x == 1 or x == 2 or x == 3:
+    if x == 1 or x == 2 or x == 3:          #First Row
         drive15squares()
         for i in range(2):
             drive1square()
@@ -115,7 +115,7 @@ def navigatesquare(x):
             sleep(0.1)
             rightturn2()
             sleep(5)
-            motor_left.run_timed(time_sp=6000, speed_sp=-172)  # moves back to first position
+            motor_left.run_timed(time_sp=6000, speed_sp=-175)  # moves back to first position
             motor_right.run_timed(time_sp=6000, speed_sp=-172)
             return
 
@@ -123,7 +123,7 @@ def navigatesquare(x):
             sleep(1.5)
             dropoffblocks()
             sleep(3)
-            motor_left.run_timed(time_sp=6000, speed_sp=-156)  # moves back to first position
+            motor_left.run_timed(time_sp=6000, speed_sp=-158)  # moves back to first position
             motor_right.run_timed(time_sp=6000, speed_sp=-156)
             return
 
@@ -138,13 +138,11 @@ def navigatesquare(x):
             sleep(0.5)
             leftturn2()
             sleep(5)
-            motor_left.run_timed(time_sp=6000, speed_sp=-172)  # moves back to first position
+            motor_left.run_timed(time_sp=6000, speed_sp=-175)  # moves back to first position
             motor_right.run_timed(time_sp=6000, speed_sp=-172)
             return
 
-    elif x == 4 or x == 5 or x == 6:
-        a1 = motor_right.position  # messures right motor position in degrees
-        b1 = motor_left.position  # messures left motor position in degrees
+    elif x == 4 or x == 5 or x == 6:#second row
         drive15squares()
         for i in range(1):
             drive1square()
@@ -155,16 +153,16 @@ def navigatesquare(x):
                 sleep(0.5)
                 rightturn2()
                 sleep(5)
-                motor_left.run_timed(time_sp=5000, speed_sp=-125)  # moves back to first position
-                motor_right.run_timed(time_sp=5000, speed_sp=-126)
+                motor_left.run_timed(time_sp=5000, speed_sp=-126)  # moves back to first position
+                motor_right.run_timed(time_sp=5000, speed_sp=-125)
                 return
 
             elif x == 5:
                 sleep(1.5)
                 dropoffblocks()
                 sleep(0.1)
-                motor_left.run_timed(time_sp=5000, speed_sp=-125)  # moves back to first position
-                motor_right.run_timed(time_sp=5000, speed_sp=-126)
+                motor_left.run_timed(time_sp=5000, speed_sp=-126)  # moves back to first position
+                motor_right.run_timed(time_sp=5000, speed_sp=-125)
                 return
 
             else:
@@ -174,10 +172,10 @@ def navigatesquare(x):
                 sleep(0.5)
                 leftturn()
                 sleep(5)
-                motor_left.run_timed(time_sp=5000, speed_sp=-125)  # moves back to first position
-                motor_right.run_timed(time_sp=5000, speed_sp=-126)
+                motor_left.run_timed(time_sp=5000, speed_sp=-126)  # moves back to first position
+                motor_right.run_timed(time_sp=5000, speed_sp=-125)
                 return
-    else:
+    else:                       #third row
         drive15squares()
         if x == 7:
             leftturn()
@@ -186,7 +184,7 @@ def navigatesquare(x):
             sleep(0.5)
             rightturn2()
             sleep(5)
-            motor_left.run_timed(time_sp=4000, speed_sp=-120)
+            motor_left.run_timed(time_sp=4000, speed_sp=-123)
             motor_right.run_timed(time_sp=4000, speed_sp=-120)
             return
 
@@ -194,7 +192,7 @@ def navigatesquare(x):
             sleep(5)
             dropoffblocks()
             sleep(0.5)
-            motor_left.run_timed(time_sp=4000, speed_sp=-120)
+            motor_left.run_timed(time_sp=4000, speed_sp=-123)
             motor_right.run_timed(time_sp=4000, speed_sp=-120)
             return
 
@@ -205,6 +203,6 @@ def navigatesquare(x):
             sleep(0.5)
             leftturn2()
             sleep(5)
-            motor_left.run_timed(time_sp=4000, speed_sp=-120)
+            motor_left.run_timed(time_sp=4000, speed_sp=-123)
             motor_right.run_timed(time_sp=4000, speed_sp=-120)
             return

@@ -1,4 +1,4 @@
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 import robot_control as ctrl
 from robot_ai_module import *
 from board import *
@@ -15,17 +15,17 @@ def getOpponentInput(board):
 
     # Try catch in case the user inputs a non-numeric value
         is_invalid = False
-        while not ts2.value():
-            if ts1.value():
+        while not ts2.value():                  #while sensor 2 is pressed
+            if ts1.value():                     #Counts the presses
                 row += 1
-                ev3.Sound.speak("Row, ",row,"Selected").wait()
+                ev3.Sound.speak("Row, ",row).wait()
                 sleep(0.5)
         sleep(1.0)
-        print(row)
-        while not ts2.value() and not is_invalid:
+        print(row)                                              #while sensor 2 is pressed
+        while not ts2.value() and not is_invalid:               #Counts the presses
             if ts1.value():
                 col += 1
-                ev3.Sound.speak("Colum ",col, "Selected").wait()
+                ev3.Sound.speak("Colum ",col).wait()
                 sleep(0.5)
 
 
@@ -56,17 +56,17 @@ def getOpponentInput(board):
                 newBoard.SetField(row, col, 2)
                 newBoard.PrintBoard()
                 ev3.Sound.speak("Are the inputs correct").wait()
-                while not (ts1.value() or ts2.value()):
+                while not (ts1.value() or ts2.value()): #Touch Sensors are used to confirm the inpus
                     sleep(0.1)
                     if ts1.value() == 1:
-                        sureYN = "Y"
+                        sureYN = "Y"            #Inputs are correct
                     elif ts2.value() == 1:
-                        sureYN = "N"
+                        sureYN = "N"            #Inputs are wrong
                     #sureYN = input("Are you sure that your input is correct?" + "\nEnter 'Y' for yes, 'N' for no: ")
                 if sureYN == "N" or sureYN == "Y":
                     break
                 else:
-                    print("Invalid input. Please press Sensor 1 or 2!")
+                    print("Invalid input. Please press Sensor 1 or 2!") #This Line is not really needed anymore
 
             if sureYN == "Y":
                break
@@ -96,14 +96,14 @@ if __name__ == '__main__':
     ev3.Sound.speak("Start the game")
     currentPlayer = None
 
-    while not (currentPlayer == 0 or currentPlayer == 1):
+    while not (currentPlayer == 0 or currentPlayer == 1): #Who plays first
         while not (ts1.value() or ts2.value()):
             sleep(0.01)
 
         if ts1.value() == 1:  #robot begins
             currentPlayer = 0
             ev3.Sound.speak("We Start")
-        elif ts2.value() == 1: #player beginns
+        elif ts2.value() == 1: #The Robots oponennt beginns
             ev3.Sound.speak("You start")
             currentPlayer = 1
        #currentPlayer = int(input("Who is starting (0: we are starting, 1: opponent is starting): "))
@@ -111,10 +111,10 @@ if __name__ == '__main__':
            #print("Invalid input. Please make sure to input valid values. (See input prompt)")
 
     while True:
-        if currentPlayer == 0:
+        if currentPlayer == 0:          #executes pre calculated moves
             makeAIMove(ai, board)
         else:
-            makeOpponentMove(board)
+            makeOpponentMove(board)    #execute opponents move
 
         print("Current board state:")
         board.PrintBoard()
@@ -135,4 +135,4 @@ if __name__ == '__main__':
 
         # Next players turn
         ev3.Sound.speak("Turn change")
-        currentPlayer = (currentPlayer + 1) % 2
+        currentPlayer = (currentPlayer + 1) % 2         # changes turn.
