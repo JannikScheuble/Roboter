@@ -56,7 +56,7 @@ class AI:
 
         return maxValueNode.nextMove
 
-    def generateMiniMaxTree(board, player):#
+    def generateMiniMaxTree(board, player):
         root = Node()
         root.board = board
         AI.generateNextNodes(player, root)
